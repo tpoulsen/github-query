@@ -68,7 +68,7 @@ data Repository = Repository
     , _owner :: User
     , _private :: Bool
     , _htmlUrl :: Url
-    , _description :: T.Text
+    , _description :: Maybe T.Text
     , _fork :: Bool
     , _repositoryUrl :: Url
     , _forksUrl :: Url
