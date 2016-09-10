@@ -1,14 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Query where
+module Github.Api.Query where
 
-import Types
+import Github.Api.Types
 
-import Control.Lens             ((^.), (.~), (&))
+import Control.Lens             ((^.), (.~), (&), (^?))
 import Data.Monoid              ((<>))
 import qualified Data.Text as T (Text, intercalate, unpack, words)
 import Network.Wreq
 
+data SearchType = Repositories | Users | Code | Issues deriving (Show, Eq, Ord)
 data SortOrder = Asc | Desc deriving (Show, Eq, Ord)
 data SortBy = Stars | Forks | Updated | Match deriving (Show, Eq, Ord)
 
@@ -43,11 +44,21 @@ query = T.intercalate "%20" . T.words
 repositories :: T.Text
 repositories = "repositories?q="
 
+searchBy :: SearchType -> T.Text
+searchBy t =
+  searchType t <> "?q="
+  where searchType t'
+          | t' == Repositories = "repositories"
+          | t' == Users = "users"
+          | t' == Code = "code"
+          | t' == Issues = "issues"
+          | otherwise = "repositories"
+
 githubSearchUrl :: T.Text
 githubSearchUrl = "https://api.github.com/search/"
 
-githubSearch :: T.Text -> IO GithubResponse
-githubSearch q = do
-  let url = T.unpack $ githubSearchUrl <> q
+githubSearch :: SearchType -> T.Text -> IO GithubResponse
+githubSearch t q = do
+  let url = T.unpack $ githubSearchUrl <> (searchBy t) <> q
   let p   = defaults
   fmap (^. responseBody) . asJSON =<< getWith p url
