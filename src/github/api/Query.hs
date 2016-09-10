@@ -41,9 +41,6 @@ order o =
 query :: T.Text -> T.Text
 query = T.intercalate "%20" . T.words
 
-repositories :: T.Text
-repositories = "repositories?q="
-
 searchBy :: SearchType -> T.Text
 searchBy t =
   searchType t <> "?q="

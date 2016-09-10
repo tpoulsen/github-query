@@ -16,6 +16,9 @@ repositorySearch = githubSearch Repositories
 userSearch :: T.Text -> IO GithubResponse
 userSearch = githubSearch Users
 
---resultCount :: GithubResponse -> Integer
---resultCount response = response ^. resultCount
+totalResults :: GithubResponse -> Integer
+totalResults response = response ^. resultCount
+
+allResults :: GithubResponse -> [ApiItem]
+allResults response = response ^. items
 

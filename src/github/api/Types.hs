@@ -2,12 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
-module Github.Api.Types (
-    User
-  , Repository
-  , ApiItem
-  , GithubResponse
-  ) where
+module Github.Api.Types where
 
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad       (mzero)

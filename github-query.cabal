@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Github.Api.Query
+  exposed-modules:     Github
                      --, Github.Api.Query
                      --, Github.Api.Types
   build-depends:       base >= 4.7 && < 5
