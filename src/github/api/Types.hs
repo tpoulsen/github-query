@@ -2,15 +2,15 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
-module Types where
+module Github.Api.Types where
 
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad       (mzero)
 import Control.Lens
+import Control.Lens.Prism
 import Data.Aeson
-import Data.Monoid
+import Data.HashMap.Lazy (member)
 import GHC.Generics
-import qualified Data.ByteString.Lazy.Internal as BS
 import qualified Data.Text as T
 
 type Url = Maybe T.Text
@@ -35,11 +35,8 @@ data User = User
     , _siteAdmin :: Bool
     } deriving (Show, Eq, Generic)
 
-makeLenses ''User
 
-instance FromJSON User where
-    parseJSON (Object o) =
-        User <$>
+parseUser o = User <$>
                 o .: "login" <*>
                 o .: "id" <*>
                 o .: "avatar_url" <*>
@@ -57,6 +54,9 @@ instance FromJSON User where
                 o .: "received_events_url" <*>
                 o .: "type" <*>
                 o .: "site_admin"
+
+instance FromJSON User where
+    parseJSON (Object o) = parseUser o
     parseJSON _ = mzero
 instance ToJSON User where
 
@@ -135,86 +135,106 @@ data Repository = Repository
 
 makeLenses ''Repository
 
+parseRepository o = Repository <$>
+                      o .: "id" <*>
+                      o .: "name" <*>
+                      o .: "full_name" <*>
+                      o .: "owner" <*>
+                      o .: "private" <*>
+                      o .: "html_url" <*>
+                      o .: "description" <*>
+                      o .: "fork" <*>
+                      o .: "url" <*>
+                      o .: "forks_url" <*>
+                      o .: "keys_url" <*>
+                      o .: "collaborators_url" <*>
+                      o .: "teams_url" <*>
+                      o .: "hooks_url" <*>
+                      o .: "issue_events_url" <*>
+                      o .: "events_url" <*>
+                      o .: "assignees_url" <*>
+                      o .: "branches_url" <*>
+                      o .: "tags_url" <*>
+                      o .: "blobs_url" <*>
+                      o .: "git_tags_url" <*>
+                      o .: "git_refs_url" <*>
+                      o .: "trees_url" <*>
+                      o .: "statuses_url" <*>
+                      o .: "languages_url" <*>
+                      o .: "stargazers_url" <*>
+                      o .: "contributors_url" <*>
+                      o .: "subscribers_url" <*>
+                      o .: "subscription_url" <*>
+                      o .: "commits_url" <*>
+                      o .: "git_commits_url" <*>
+                      o .: "comments_url" <*>
+                      o .: "issue_comment_url" <*>
+                      o .: "contents_url" <*>
+                      o .: "compare_url" <*>
+                      o .: "merges_url" <*>
+                      o .: "archive_url" <*>
+                      o .: "downloads_url" <*>
+                      o .: "issues_url" <*>
+                      o .: "pulls_url" <*>
+                      o .: "milestones_url" <*>
+                      o .: "notifications_url" <*>
+                      o .: "labels_url" <*>
+                      o .: "releases_url" <*>
+                      o .: "deployments_url" <*>
+                      o .: "created_at" <*>
+                      o .: "updated_at" <*>
+                      o .: "pushed_at" <*>
+                      o .: "git_url" <*>
+                      o .: "ssh_url" <*>
+                      o .: "clone_url" <*>
+                      o .: "svn_url" <*>
+                      o .: "homepage" <*>
+                      o .: "size" <*>
+                      o .: "stargazers_count" <*>
+                      o .: "watchers_count" <*>
+                      o .: "language" <*>
+                      o .: "has_issues" <*>
+                      o .: "has_downloads" <*>
+                      o .: "has_wiki" <*>
+                      o .: "has_pages" <*>
+                      o .: "forks_count" <*>
+                      o .: "mirror_url" <*>
+                      o .: "open_issues_count" <*>
+                      o .: "forks" <*>
+                      o .: "open_issues" <*>
+                      o .: "watchers" <*>
+                      o .: "default_branch" <*>
+                      o .: "score"
+
 instance FromJSON Repository where
-    parseJSON (Object o) =
-        Repository <$>
-                o .: "id" <*>
-                o .: "name" <*>
-                o .: "full_name" <*>
-                o .: "owner" <*>
-                o .: "private" <*>
-                o .: "html_url" <*>
-                o .: "description" <*>
-                o .: "fork" <*>
-                o .: "url" <*>
-                o .: "forks_url" <*>
-                o .: "keys_url" <*>
-                o .: "collaborators_url" <*>
-                o .: "teams_url" <*>
-                o .: "hooks_url" <*>
-                o .: "issue_events_url" <*>
-                o .: "events_url" <*>
-                o .: "assignees_url" <*>
-                o .: "branches_url" <*>
-                o .: "tags_url" <*>
-                o .: "blobs_url" <*>
-                o .: "git_tags_url" <*>
-                o .: "git_refs_url" <*>
-                o .: "trees_url" <*>
-                o .: "statuses_url" <*>
-                o .: "languages_url" <*>
-                o .: "stargazers_url" <*>
-                o .: "contributors_url" <*>
-                o .: "subscribers_url" <*>
-                o .: "subscription_url" <*>
-                o .: "commits_url" <*>
-                o .: "git_commits_url" <*>
-                o .: "comments_url" <*>
-                o .: "issue_comment_url" <*>
-                o .: "contents_url" <*>
-                o .: "compare_url" <*>
-                o .: "merges_url" <*>
-                o .: "archive_url" <*>
-                o .: "downloads_url" <*>
-                o .: "issues_url" <*>
-                o .: "pulls_url" <*>
-                o .: "milestones_url" <*>
-                o .: "notifications_url" <*>
-                o .: "labels_url" <*>
-                o .: "releases_url" <*>
-                o .: "deployments_url" <*>
-                o .: "created_at" <*>
-                o .: "updated_at" <*>
-                o .: "pushed_at" <*>
-                o .: "git_url" <*>
-                o .: "ssh_url" <*>
-                o .: "clone_url" <*>
-                o .: "svn_url" <*>
-                o .: "homepage" <*>
-                o .: "size" <*>
-                o .: "stargazers_count" <*>
-                o .: "watchers_count" <*>
-                o .: "language" <*>
-                o .: "has_issues" <*>
-                o .: "has_downloads" <*>
-                o .: "has_wiki" <*>
-                o .: "has_pages" <*>
-                o .: "forks_count" <*>
-                o .: "mirror_url" <*>
-                o .: "open_issues_count" <*>
-                o .: "forks" <*>
-                o .: "open_issues" <*>
-                o .: "watchers" <*>
-                o .: "default_branch" <*>
-                o .: "score"
+    parseJSON (Object o) = parseRepository o
     parseJSON _ = mzero
 instance ToJSON Repository where
+
+-----------------------------------------------------------
+data ApiItem  = ApiUser User
+              | ApiRepository Repository
+              deriving (Show, Eq, Generic)
+makeLenses ''ApiItem
+makePrisms ''ApiItem
+
+parseApiItem isUser isRepo value
+  | isUser = ApiUser <$> parseUser value
+  | isRepo = ApiRepository <$> parseRepository value
+
+instance FromJSON ApiItem where
+  parseJSON (Object o) = apiItem
+    where isUser = member "login" o
+          isRepo = member "full_name" o
+          apiItem = parseApiItem isUser isRepo o
+  parseJSON _ = mzero
+instance ToJSON ApiItem where
 
 -----------------------------------------------------------
 data GithubResponse = GithubResponse
     {  _resultCount :: Integer
     ,  _incompleteResults :: Bool
-    ,  _items :: [Repository]
+    ,  _items :: [ApiItem]
     } deriving (Show, Eq, Generic)
 
 makeLenses ''GithubResponse
@@ -227,3 +247,5 @@ instance FromJSON GithubResponse where
                 o .: "items"
     parseJSON _  = mzero
 instance ToJSON GithubResponse where
+
+makeLenses ''User
